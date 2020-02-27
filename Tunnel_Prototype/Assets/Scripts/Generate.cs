@@ -12,9 +12,11 @@ public class Generate : MonoBehaviour
     private GameObject[] L3;
     private GameObject[] L4;
     private GameObject[] L5;
+    private GameObject[] L6;
     public int nL3;
     public int nL4;
     public int nL5;
+    public int nL6;
     Quaternion currentRotation;
     public bool generateNow=false;
 
@@ -29,7 +31,7 @@ public class Generate : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+       // Physics.gravity = Vector3.zero;
     }
 
     // Update is called once per frame
@@ -37,7 +39,7 @@ public class Generate : MonoBehaviour
     {
         if(generateNow)
         {
-            generateLayers();
+            //generateLayers();
             spawnLogic();
             generateNow = false;
             StopAllCoroutines();
@@ -52,10 +54,13 @@ public class Generate : MonoBehaviour
         generateL3();
         generateL4();
         generateL5();
+        generateL6();
     }
 
     void spawnLogic()//this function decides where to Instantiate the objects in the scene
     {   int i;
+        int j;
+        GameObject furniture;
         GameObject ground;
         ground = generateL1();
         
@@ -64,18 +69,27 @@ public class Generate : MonoBehaviour
         Instantiate(generateL2(), new Vector3(-9,2.5f, 0), generateL2().transform.rotation);
 
 
-        for (i = 0; i < nL4; i++)
+        for (i = 0; i <= nL4; i++)
         {
             currentRotation.eulerAngles = new Vector3(0, Random.Range(-15, 15), 0);
-            Instantiate(generateL4(), new Vector3(Random.Range(-8, 8), Random.Range(2, 3), Random.Range(-13, 13)), currentRotation);
+            furniture = Instantiate(generateL4(), new Vector3(Random.Range(-8, 8), 0f, Random.Range(-13, 13)), currentRotation);
+            Debug.Log(furniture.transform.position); 
+            for (j = 0; j <= nL6; j++)
+            {
+                currentRotation.eulerAngles = new Vector3(0, Random.Range(-30, 30), 0);
+                Instantiate(generateL6(), new Vector3(furniture.transform.position.x+ Random.Range(-0.1f, 0.1f), 2f , furniture.transform.position.z + Random.Range(-0.1f, 0.1f)), currentRotation);
+            }
         }
-        for (i = 0; i < nL5; i++)
+        for (i = 0; i <= nL5; i++)
         {
             currentRotation.eulerAngles = new Vector3(0, Random.Range(-30, 30), 0);
-            Instantiate(generateL5(), new Vector3(Random.Range(-8, 8), 3.5f, Random.Range(-13, 13)), currentRotation);
+            furniture = generateL5();
+                Instantiate(furniture, new Vector3(Random.Range(-8, 8), 0f, Random.Range(-13, 13)), currentRotation);
+
+         
         }
         
-        for (i = 0; i < nL3; i++)
+        for (i = 0; i <= nL3; i++)
             Instantiate(generateL3(), new Vector3(Random.Range(-8, 8), 4.5f, Random.Range(-13, 13)),generateL3().transform.rotation);
     }
     #region Generate the first layer of objects
@@ -95,8 +109,8 @@ public class Generate : MonoBehaviour
         {
 
             string res = currentFile.Replace(Application.dataPath + "/Resources/", "").Replace(".prefab", "").Replace("\\", "/").Trim();// creating a path readable by the resources.load function
-           // Debug.Log(res);
-
+                                                                                                                                        // Debug.Log(res);
+            
             L1[i] = Resources.Load<GameObject>(res);// each object in the folder L1 is beign recorded into the L1 gameobject array
             i++;
         }
@@ -223,7 +237,10 @@ public class Generate : MonoBehaviour
 
             L5[i] = Resources.Load<GameObject>(res);
             if (L5[i].GetComponent<Rigidbody>() == null)
+            
                 L5[i].AddComponent<Rigidbody>();
+            //L5[i].GetComponent<Rigidbody>().useGravity = false;
+            //L5[i].GetComponent<Rigidbody>().isKinematic = true;
             if (L5[i].GetComponent<MeshCollider>())
                 L5[i].GetComponent<MeshCollider>().convex=true;
             i++;
@@ -231,6 +248,40 @@ public class Generate : MonoBehaviour
         int j;
         j = Random.Range(0, i);
         return (L5[j]);
+        //  Instantiate(L5[0], transform.parent);
+    }
+    #endregion
+
+    #region Generate the sixth layer of objects
+    GameObject generateL6()
+    {
+        int i = 0;
+        string path = Application.dataPath;
+        path += ("/Resources/Tunnel_A/L6");
+        var num = Directory.EnumerateFiles(path, "*.prefab", SearchOption.AllDirectories);
+        foreach (string currentFile in num)
+        {
+            i++;
+        }
+        L6 = new GameObject[i];
+        i = 0;
+        foreach (string currentFile in num)
+        {
+
+            string res = currentFile.Replace(Application.dataPath + "/Resources/", "").Replace(".prefab", "").Replace("\\", "/").Trim();
+
+            //Debug.Log(res);
+
+            L6[i] = Resources.Load<GameObject>(res);
+            if (L6[i].GetComponent<Rigidbody>() == null)
+                L6[i].AddComponent<Rigidbody>();
+            if (L6[i].GetComponent<MeshCollider>())
+                L6[i].GetComponent<MeshCollider>().convex = true;
+            i++;
+        }
+        int j;
+        j = Random.Range(0, i);
+        return (L6[j]);
         //  Instantiate(L5[0], transform.parent);
     }
     #endregion
