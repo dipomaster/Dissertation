@@ -17,14 +17,15 @@ public class Generate : MonoBehaviour
     public int nL4;
     public int nL5;
     public int nL6;
+    private Transform local;
     Quaternion currentRotation;
     public bool generateNow=false;
 
     private void Awake()
     {
 
+        local = gameObject.transform;
 
-        
     }
 
 
@@ -57,41 +58,63 @@ public class Generate : MonoBehaviour
         generateL6();
     }
 
-    void spawnLogic()//this function decides where to Instantiate the objects in the scene
-    {   int i;
+    void spawnLogic() //this function decides where to Instantiate the objects in the scene
+    {
+        int i;
         int j;
         GameObject furniture;
         GameObject ground;
         ground = generateL1();
-        
-        Instantiate(ground,transform.parent);
-        Instantiate(generateL2(), new Vector3(9,2.5f,0), generateL2().transform.rotation);
-        Instantiate(generateL2(), new Vector3(-9,2.5f, 0), generateL2().transform.rotation);
+
+        Instantiate(ground, local); //floor
+        Instantiate(ground, new Vector3(local.position.x, 4.5f+local.position.y, local.position.z),new Quaternion(0,0,180,0)); //floor
+        Instantiate(generateL2(), new Vector3(9 + local.position.x, 2.5f + local.position.y, 0 + local.position.z),
+            generateL2().transform.rotation); //walls R
+        Instantiate(generateL2(), new Vector3(-9 + local.position.x, 2.5f + local.position.y, 0 + local.position.z),
+            generateL2().transform.rotation); //walls L
 
 
-        for (i = 0; i <= nL4; i++)
+        for (i = 0; i <= nL4; i++) //ground
         {
             currentRotation.eulerAngles = new Vector3(0, Random.Range(-15, 15), 0);
-            furniture = Instantiate(generateL4(), new Vector3(Random.Range(-8, 8), 0f, Random.Range(-13, 13)), currentRotation);
-            Debug.Log(furniture.transform.position); 
+            furniture = Instantiate(generateL4(),
+                new Vector3(Random.Range(-8.7f, 8.7f) + local.position.x, 0f, Random.Range(-13.7f, 13.7f) + local.position.z),
+                currentRotation);
+            float z = Random.Range(0.1f, 1f);
+            furniture.transform.localScale = new Vector3(z, z, z);
+
+            //Debug.Log(furniture.transform.position); 
             for (j = 0; j <= nL6; j++)
             {
                 currentRotation.eulerAngles = new Vector3(0, Random.Range(-30, 30), 0);
-                Instantiate(generateL6(), new Vector3(furniture.transform.position.x+ Random.Range(-0.1f, 0.1f), 2f , furniture.transform.position.z + Random.Range(-0.1f, 0.1f)), currentRotation);
+                GameObject go = Instantiate(generateL6(),
+                    new Vector3(furniture.transform.position.x + Random.Range(-0.1f, 0.1f), 2f,
+                        furniture.transform.position.z + Random.Range(-0.1f, 0.1f)), currentRotation);
+                float s = Random.Range(0.1f, 0.2f);
+                go.transform.localScale = new Vector3(s, s, s);
             }
         }
+
         for (i = 0; i <= nL5; i++)
         {
             currentRotation.eulerAngles = new Vector3(0, Random.Range(-30, 30), 0);
             furniture = generateL5();
-                Instantiate(furniture, new Vector3(Random.Range(-8, 8), 0f, Random.Range(-13, 13)), currentRotation);
+            // Instantiate(furniture, new Vector3(Random.Range(-8, 8)+local.position.x, 0f, Random.Range(-13, 13) + local.position.z), currentRotation);
 
-         
+
         }
-        
-        for (i = 0; i <= nL3; i++)
-            Instantiate(generateL3(), new Vector3(Random.Range(-8, 8), 4.5f, Random.Range(-13, 13)),generateL3().transform.rotation);
+
+        for (i = 0; i <= nL3; i++) //cieling
+        {
+            currentRotation.eulerAngles = new Vector3(0, Random.Range(-15, 15), 180);
+            GameObject go = Instantiate(generateL3(),
+                new Vector3(Random.Range(-8.7f, 8.7f) + local.position.x, 4.5f, Random.Range(-13, 13) + local.position.z),
+                currentRotation);
+            float s = Random.Range(0.1f, 1f);
+            go.transform.localScale = new Vector3(s, s, s);
+        }
     }
+
     #region Generate the first layer of objects
     GameObject generateL1() //this function will generate a game object containing a prefab from the designated folder
     {
@@ -152,11 +175,11 @@ public class Generate : MonoBehaviour
     #endregion
 
     #region Generate the third layer of objects
-    GameObject generateL3()
+    GameObject generateL3()//cieling
     {
         int i = 0;
         string path = Application.dataPath;
-        path += ("/Resources/Tunnel_A/L3");
+        path += ("/Resources/LowPoly_Rocks/Prefabs/Stalagmite");
         var num = Directory.EnumerateFiles(path, "*.prefab", SearchOption.AllDirectories);
         foreach (string currentFile in num)
         {
@@ -173,6 +196,7 @@ public class Generate : MonoBehaviour
             L3[i] = Resources.Load<GameObject>(res);
             if (L3[i].GetComponent<MeshCollider>())
                 L3[i].GetComponent<MeshCollider>().convex = true;
+            L3[i].GetComponent<Rigidbody>().isKinematic = true;
             i++;
         }
         int j;
@@ -187,7 +211,7 @@ public class Generate : MonoBehaviour
     {
         int i = 0;
         string path = Application.dataPath;
-        path += ("/Resources/Tunnel_A/L4");
+        path += ("/Resources/LowPoly_Rocks/Prefabs/Round");
         var num = Directory.EnumerateFiles(path, "*.prefab", SearchOption.AllDirectories);
         foreach (string currentFile in num)
         {
@@ -206,6 +230,7 @@ public class Generate : MonoBehaviour
                 L4[i].AddComponent<Rigidbody>();
             if (L4[i].GetComponent<MeshCollider>())
                 L4[i].GetComponent<MeshCollider>().convex = true;
+            L4[i].GetComponent<Rigidbody>().isKinematic = true;
             i++;
         }
         int j;
@@ -220,7 +245,7 @@ public class Generate : MonoBehaviour
     {
         int i = 0;
         string path = Application.dataPath;
-        path += ("/Resources/Tunnel_A/L5");
+        path += ("/Resources/LowPoly_Rocks/Prefabs/Round");
         var num = Directory.EnumerateFiles(path, "*.prefab", SearchOption.AllDirectories);
         foreach (string currentFile in num)
         {
@@ -257,7 +282,7 @@ public class Generate : MonoBehaviour
     {
         int i = 0;
         string path = Application.dataPath;
-        path += ("/Resources/Tunnel_A/L6");
+        path += ("/Resources/LowPoly_Rocks/Prefabs/Round");
         var num = Directory.EnumerateFiles(path, "*.prefab", SearchOption.AllDirectories);
         foreach (string currentFile in num)
         {
@@ -277,6 +302,8 @@ public class Generate : MonoBehaviour
                 L6[i].AddComponent<Rigidbody>();
             if (L6[i].GetComponent<MeshCollider>())
                 L6[i].GetComponent<MeshCollider>().convex = true;
+            L4[i].GetComponent<Rigidbody>().isKinematic = false;
+
             i++;
         }
         int j;
